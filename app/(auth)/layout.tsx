@@ -1,15 +1,14 @@
-const autlayout = ({
+
+
+const signuplayout = ({
     children
 }: {
-    children: React.ReactNode;
+    children: React.ReactNode
 }) => {
-  return (
-    <div className="flex flex-col gap-y-4">
-        <nav className="bg-green-700 w-full">
-        nav bar
-        </nav>
-      {children}
-    </div>
-  );
+    return (
+       <div className="h-full flex items-center justify-center">
+              {children}
+       </div>
+    );
 }
-export default autlayout;
+export default signuplayout;

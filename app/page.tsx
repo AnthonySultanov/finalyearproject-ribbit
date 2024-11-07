@@ -1,12 +1,10 @@
-import { Button } from "@/components/ui/button";
-
-
-export default function Home() {
+import { UserButton } from "@clerk/nextjs";
+export default function Homepage() {
   return (
-   <Button size={"lg"} variant={"destructive"}>
-    Cick
-    </Button>
-
+  <div className="flex flex-col gap-y-8">
+<h1>dashboard</h1>
+<UserButton afterSignOutUrl="/"/>
+   </div>
    
   );
 }
