@@ -38,6 +38,10 @@ username:testaccount
 email:Anthony9@live.ie
 password:vondutch89432
 
+
+
+database password:G2N2U52wi7GMoi4a
+
 to run :
 npm run dev
 
@@ -47,12 +51,17 @@ when you add _ it means dont add in router eg _components
 
 
 
+ngrok http 3000 
+this is to run a new web url
+
+for a sable same url run
+ngrok http --url=charmed-suitably-javelin.ngrok-free.app 3000
+ https://charmed-suitably-javelin.ngrok-free.app
 
 
 
 
-
-
+to see db run :npx prisma studio
 
 
 
