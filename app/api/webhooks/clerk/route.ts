@@ -1,6 +1,6 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
-import { WebhookEvent } from '@clerk/nextjs/server'
+import { currentUser, WebhookEvent } from '@clerk/nextjs/server'
 import {db} from '@/lib/db'
 
 
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
   // For this guide, log payload to console
   
    const eventType = evt.type;
-
+//create user
   if (eventType === 'user.created') {
 
     await db.userlogged.create({
@@ -74,6 +74,40 @@ export async function POST(req: Request) {
     });
   
   }
+
+
+//update user
+  if (eventType === 'user.updated') {
+//check if user exists
+    if (!currentUser){
+      return new Response('Error: User not found', { status: 404 })
+    }
+    
+    await db.userlogged.update({
+      where: {
+        externalUserId: payload.data.id,
+      },
+      data: {
+        username: payload.data.username,
+        imageUrl: payload.data.image_url,
+      }
+    });
+  
+  }
+
+
+//delete user
+  if (eventType === 'user.deleted') {
+    await db.userlogged.delete({
+      where: {
+        externalUserId: payload.data.id,
+      }
+    });
+  
+  }
+
+
+
  
 
   return new Response('Webhook received', { status: 200 })
@@ -81,7 +115,7 @@ export async function POST(req: Request) {
 
 
 
-}
+};
 
 
 
