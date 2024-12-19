@@ -1,4 +1,7 @@
+import { Sidebar, SidebarSkeleton } from "./_compenents/sidebar";
 import { Navbar } from "./_compenents/navbar";
+import { Container } from "./_compenents/container";
+import { Suspense } from "react";
 
 const BrowserLayout = ({
     children,
@@ -9,7 +12,12 @@ const BrowserLayout = ({
         <>
         <Navbar />
            <div className="flex h-full pt-20">
-            {children}
+            <Suspense fallback={<SidebarSkeleton />}>
+            <Sidebar /> 
+            </Suspense>
+            <Container>
+           {children}
+           </Container>
             </div>
         </>
     ); 

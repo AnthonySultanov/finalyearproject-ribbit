@@ -1,6 +1,6 @@
 import { Actions } from "./actions";
 import { Logo } from "./logo";
-import { SearchBar } from "./search";
+import { SearchBar } from "./searchbar";
 
 export const Navbar = () => {
     return (
