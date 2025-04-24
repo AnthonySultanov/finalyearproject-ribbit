@@ -24,7 +24,7 @@ interface LoggedUserItemProps {
 export const LoggedUserItem = ({username,imageUrl,islive}: LoggedUserItemProps) => {
     const pathname = usePathname();
     const {collapsed} = useEnableSidebar((state) => state);
-    const href = `/u/${username}`;
+    const href = `/${username}`;
     const isActive = pathname === href;
 
 

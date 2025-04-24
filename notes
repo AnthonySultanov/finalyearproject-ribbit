@@ -40,13 +40,15 @@ password:vondutch89432
 
 
 
-database password:G2N2U52wi7GMoi4a
+database password:xFHMqNVdGx5qzta9
 
 to run :
 npm run dev
 
 when we but () it doesnt show in url eg (auth) wont show 
 when you add _ it means dont add in router eg _components
+when you add [] it means it is dynamic so u can asses that part of url
+
 
 
 

@@ -11,20 +11,52 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 
 model userlogged {
-  id String @id @default(uuid())
-  username String @unique
-  imageUrl String @db.Text
-  externalUserId String @unique
-  bio String? @db.Text
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id             String   @id @default(uuid())
+  username       String   @unique
+  imageUrl       String   @db.Text
+  externalUserId String   @unique
+  bio            String?  @db.Text
+  following following[] @relation("following")
+  followedby following[] @relation("followedby")
+  blocking blocking[] @relation("blocking")
+  blocked blocking[] @relation("blocked")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
+
+model following {
+  id             String   @id @default(uuid())
+  followerId     String
+  followingId    String
+  follower userlogged @relation(name: "following", fields: [followerId], references: [id], onDelete: Cascade)
+  following userlogged @relation(name: "followedby", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+
+model blocking {
+  id             String   @id @default(uuid())
+  blockerId      String
+  blockedId      String
+  blocker userlogged @relation(name: "blocking", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked userlogged @relation(name: "blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+}
 
 

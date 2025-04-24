@@ -25,7 +25,7 @@ export const Container = ({children,}:ContainerProps) => {
         }
     }, [matches, onCollapse, onExpand]);
     return (
-        //ml-[70px] means margin-left: 70px when collapsed is true
+        
         <div className={cn("flex-1", collapsed ? "ml-[70px]" : "ml-[70px] lg:ml-60" )} >
             {children}
         </div>
