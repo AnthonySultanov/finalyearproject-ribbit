@@ -1,6 +1,5 @@
 "use server";
 import { revalidatePath } from "next/cache";
-//imports from the following-service.ts file
 import { followtheuser, unfollowtheuser } from "@/lib/following-service";
 //this is the function that follows a user
 export const whenfollow = async (id: string) => {

@@ -12,6 +12,7 @@ const font = Poppins({
 
 export const Logo = () => {
     return (
+        //old logo code that didnt work
         // <div>
         //     LOGO
         // </div>

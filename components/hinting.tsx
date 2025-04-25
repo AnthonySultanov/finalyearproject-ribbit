@@ -14,16 +14,16 @@ interface HintingProps {
 export const Hinting = ({ label, children, asChild, side, align }: HintingProps) => {
     return (
         <TooltipProvider>
-         <Tooltip delayDuration={0}>
-        <TooltipTrigger asChild={asChild}>
-            {children}
-        </TooltipTrigger>
-        <TooltipContent className="text-green-300 bg-grey" side={side} align={align}>
-            <p className="font-bold">
-                {label}
-            </p>
-        </TooltipContent>
-         </Tooltip>
+            <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                    {children}
+                </TooltipTrigger>
+                <TooltipContent className="text-green-300 bg-grey" side={side} align={align}>
+                    <p className="font-bold">
+                        {label}
+                    </p>
+                </TooltipContent>
+            </Tooltip>
         </TooltipProvider>
     );
 };

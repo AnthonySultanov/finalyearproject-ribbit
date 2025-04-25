@@ -57,6 +57,7 @@ export const UserPF = ({ username,imageUrl,isLive,showLiveDot,size }: UserPFProp
 
 
 interface UserIconSkeletonProps extends VariantProps<typeof UserPFSizes> {};
+
 export const UserIconSkeleton = ({ size }: UserIconSkeletonProps) => {
     return (
         <Skeleton className={cn( "rounded-full",UserPFSizes({size}),)} />

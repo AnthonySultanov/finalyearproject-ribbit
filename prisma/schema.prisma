@@ -1,62 +1,79 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
-
 model userlogged {
-  id             String   @id @default(uuid())
-  username       String   @unique
-  imageUrl       String   @db.Text
-  externalUserId String   @unique
-  bio            String?  @db.Text
-  following following[] @relation("following")
-  followedby following[] @relation("followedby")
-  blocking blocking[] @relation("blocking")
-  blocked blocking[] @relation("blocked")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id             String      @id @default(uuid())
+  username       String      @unique
+  imageUrl       String
+  externalUserId String      @unique
+  bio            String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  blocked        blocking[]  @relation("blocked")
+  blocking       blocking[]  @relation("blocking")
+  following      following[] @relation("following")
+  followedby     following[] @relation("followedby")
+
+  streaming streaming?
 }
 
-
 model following {
-  id             String   @id @default(uuid())
-  followerId     String
-  followingId    String
-  follower userlogged @relation(name: "following", fields: [followerId], references: [id], onDelete: Cascade)
-  following userlogged @relation(name: "followedby", fields: [followingId], references: [id], onDelete: Cascade)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id          String     @id @default(uuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  follower    userlogged @relation("following", fields: [followerId], references: [id], onDelete: Cascade)
+  following   userlogged @relation("followedby", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@unique([followerId, followingId])
   @@index([followerId])
   @@index([followingId])
 }
 
-
 model blocking {
-  id             String   @id @default(uuid())
-  blockerId      String
-  blockedId      String
-  blocker userlogged @relation(name: "blocking", fields: [blockerId], references: [id], onDelete: Cascade)
-  blocked userlogged @relation(name: "blocked", fields: [blockedId], references: [id], onDelete: Cascade)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id        String     @id @default(uuid())
+  blockerId String
+  blockedId String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  blocked   userlogged @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  blocker   userlogged @relation("blocking", fields: [blockerId], references: [id], onDelete: Cascade)
 
   @@unique([blockerId, blockedId])
   @@index([blockerId])
   @@index([blockedId])
 }
 
+model streaming{
+  id String @id @default(uuid()) @db.Uuid
+  name String @db.Text
+  thumbnailUrl String? @db.Text
+  ingressId String? @unique
+  serverUrl String? @db.Text
+  streamingKey String? @db.Text
 
+
+  isLive Boolean @default(false)
+  isChatEnabled Boolean @default(true)
+  isChatDelaymode Boolean @default(false)
+  isChatFollowersOnly Boolean @default(false)
+
+  userId String @unique @db.Uuid
+  user userlogged @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([ingressId])
+ // @@fulltext([name])
+
+}

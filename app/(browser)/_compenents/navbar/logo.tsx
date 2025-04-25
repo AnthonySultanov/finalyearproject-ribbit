@@ -13,6 +13,7 @@ const font = Poppins({
 
 export const Logo = () => {
     return (
+        //old logo code that didnt work
         // <div>
         //     LOGO
         // </div>
@@ -22,9 +23,9 @@ export const Logo = () => {
         // </div>
 
         <Link href="/"> 
-        <div className="flex items-center gap-x-4 hover:opacity-75 transition  ">
-            <div className="bg-green-950 rounded-full p-1 mr-12 shrink-0 lg:mr-0 lg:shrink ">
-                <Image src="/pepo-jam-pepe.svg" alt="Ribbit" width={45} height={45} />
+        <div className="flex items-center gap-x-4 hover:opacity-75 transition">
+            <div className="bg-green-950 rounded-full p-2 mr-12 shrink-0 lg:mr-0 lg:shrink h-16 w-16 flex items-center justify-center">
+                <Image src="/pepo-jam-pepe.svg" alt="Ribbit" width={55} height={55} />
             </div>
 
 

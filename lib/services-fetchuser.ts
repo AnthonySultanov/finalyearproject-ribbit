@@ -11,7 +11,7 @@ export const infouser = async () => {
     const self = await currentUser();
 
     if (!self || !self.username) {
-        throw new Error("You must be signed in");
+        throw new Error("Notallowed");
     }
 
     const user = await db.userlogged.findUnique({
@@ -20,12 +20,38 @@ export const infouser = async () => {
 
 
     if (!user) {
-        throw new Error("User not found");
+        throw new Error("Not found");
     }
 
     return user;
 
 
 };
+
+
+
+export const fetchusername = async (username: string) => {
+
+   
+
+    const user = await db.userlogged.findUnique({
+        where: {
+            username
+        },
+        include: {
+            streaming: true,
+            _count: {
+                select: {
+                    followedby: true
+                }
+            }
+        }
+    });
+
+  
+    return user;
+}
+
+
 
 

@@ -5,7 +5,7 @@ import { following, userlogged } from "@prisma/client";
 import { LoggedUserItem, LoggedUserItemSkeleton } from "./Logged-User-Item";
 
 interface FollowedUsersProps { 
-    data: (following & {following: userlogged})[];
+    data: (following & {following: userlogged & {streaming: { isLive: boolean } | null}})[];
  }
 
 export const FollowedUsers = ({data}: FollowedUsersProps) => {
@@ -29,6 +29,7 @@ if (!data.length) {
                  key={follow.id}
                  username={follow.following.username}
                  imageUrl={follow.following.imageUrl}
+                 islive={follow.following.streaming?.isLive}
                 //  islive={true}
                  />
             ))}
