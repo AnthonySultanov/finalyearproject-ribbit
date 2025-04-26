@@ -13,7 +13,18 @@ const roomClient = new RoomServiceClient(
   process.env.LIVEKIT_API_SECRET!
 );
 
-export const updatestream = async (value: Partial<streaming>) => {
+//this is the interface for the updatestream function
+interface UpdateStreamProps {
+  name?: string;
+  thumbnailUrl?: string | null;
+  isChatEnabled?: boolean;
+  isChatDelaymode?: boolean;
+  isChatFollowersOnly?: boolean;
+  isChatPlaysEnabled?: boolean;
+  allowedChatKeys?: string;
+}
+
+export const updatestream = async (values: UpdateStreamProps) => {
    try {
     const self = await infouser();
     const selfstream = await db.streaming.findUnique({
@@ -27,11 +38,13 @@ export const updatestream = async (value: Partial<streaming>) => {
     }
 
     const validdata = {
-        name: value.name,
-        isChatEnabled: value.isChatEnabled,
-        isChatDelaymode: value.isChatDelaymode,
-        isChatFollowersOnly: value.isChatFollowersOnly,
-        thumbnailUrl: value.thumbnailUrl,
+        name: values.name,
+        isChatEnabled: values.isChatEnabled,
+        isChatDelaymode: values.isChatDelaymode,
+        isChatFollowersOnly: values.isChatFollowersOnly,
+        thumbnailUrl: values.thumbnailUrl,
+        isChatPlaysEnabled: values.isChatPlaysEnabled,
+        allowedChatKeys: values.allowedChatKeys,
     };
 
     const updatedStream = await db.streaming.update({
@@ -44,9 +57,9 @@ export const updatestream = async (value: Partial<streaming>) => {
 
     //this will send the updated settings to the room
     if (
-      value.isChatEnabled !== undefined ||
-      value.isChatDelaymode !== undefined ||
-      value.isChatFollowersOnly !== undefined
+      values.isChatEnabled !== undefined ||
+      values.isChatDelaymode !== undefined ||
+      values.isChatFollowersOnly !== undefined
     ) {
       //this will create a data message with the updated settings
       const dataMessage = {

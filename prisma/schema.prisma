@@ -65,7 +65,8 @@ model streaming{
   isChatEnabled Boolean @default(true)
   isChatDelaymode Boolean @default(false)
   isChatFollowersOnly Boolean @default(false)
-
+  isChatPlaysEnabled Boolean @default(false)
+  allowedChatKeys String @default("wasd") 
   userId String @unique @db.Uuid
   user userlogged @relation(fields: [userId], references: [id], onDelete: Cascade)
 

@@ -9,6 +9,7 @@ import {
   useRemoteParticipant,
   useRoomContext,
 } from "@livekit/components-react";
+import { v4 as uuidv4 } from "uuid";
 
 import { ChatVariant, useEnablechatsidebar } from "@/storing/enable-chat-sidebar";
 import { ChatsHeader, ChatsHeaderSkeleton } from "./chatsheader";
@@ -17,6 +18,7 @@ import { Chatlist, ChatlistSkeleton } from "./chatlist";
 import { Communitymode } from "./Communitymodepage";
 import { format } from "date-fns";
 import { stringToColor } from "@/lib/utils";
+import { processChatPlaysMessage } from "@/actions/chatplays";
 
 //this will declare the global window property for TypeScript
 declare global {
@@ -63,7 +65,7 @@ export const Chat = ({
     const { chatMessages: messages, send } = useChat();
 
     //this will listen for data messages from the host
-    useEffect(() => { 
+    useEffect(() => {
         if (!room) return;
 
         //this will handle data messages for chat settings
@@ -75,7 +77,7 @@ export const Chat = ({
                 
                 //this will check if it's a chat settings update
                 if (data.type === 'chat_settings_update') {
-                    //this will update the local state with the new settings
+                    //this will update the settings
                     if (data.isChatEnabled !== undefined) {
                         setIsChatEnabled(data.isChatEnabled);
                     }
@@ -85,6 +87,37 @@ export const Chat = ({
                     if (data.isChatFollowersOnly !== undefined) {
                         setIsChatFollowersOnly(data.isChatFollowersOnly);
                     }
+                }
+
+                //this will process all incoming chat messages for chat plays, regardless of source
+                if (data.message && data.user) {
+                    //this will process any message for Chat Plays
+                    processChatPlaysMessage(data.message, hostIdentity)
+                        .then((result) => {
+                            if (result.success) {
+                                console.log(`Chat Plays: ${result.key} pressed from ${data.user}`);
+                                  
+                                //this will dispatch event for Chat Plays handler to pick up
+                                window.dispatchEvent(new CustomEvent('chat-message', {
+                                    detail: {
+                                        message: data.message,
+                                        sender: data.user,
+                                        key: result.key,
+                                        allowedKeys: result.allowedKeys
+                                    }
+                                }));
+                                
+                                //this will also dispatch for extension
+                                window.dispatchEvent(new CustomEvent('ribbit-chat-message', {
+                                    detail: {
+                                        key: result.key,
+                                        message: data.message,
+                                        sender: data.user,
+                                        allowedKeys: result.allowedKeys
+                                    }
+                                }));
+                            }
+                        });
                 }
             } catch (error) {
                 console.error('Error parsing data message:', error);
@@ -211,8 +244,26 @@ export const Chat = ({
         send("System: Only the streamer can use the /unban command");
       }
     } else {
-      //this will send a normal message
+      // Send message to chat
       send(value);
+      
+      // We don't need to check for viewerName === hostName here
+      // Process all messages for Chat Plays regardless of who sent them
+      processChatPlaysMessage(value, hostIdentity)
+          .then((result) => {
+              if (result.success) {
+                  console.log(`Chat Plays: ${result.key} pressed from ${viewerName}`);
+                  
+                  window.dispatchEvent(new CustomEvent('ribbit-chat-message', {
+                      detail: {
+                          key: result.key,
+                          message: value,
+                          sender: viewerName, 
+                          allowedKeys: result.allowedKeys
+                      }
+                  }));
+              }
+          });
     }
     
     setValue("");
@@ -222,6 +273,47 @@ export const Chat = ({
     setValue(value);
   };
     
+    //this will process every chat message from any user
+    useEffect(() => {
+      if (!messages.length || !isChatEnabled) return;
+      
+      //this will process the most recent message (at index 0 after our sort)
+      const latestMessage = messages[0];
+      
+   
+      if (!latestMessage.from?.name || latestMessage.message.startsWith('System:')) {
+        return;
+      }
+      
+      //this will process for Chat Plays
+      processChatPlaysMessage(latestMessage.message, hostIdentity)
+        .then((result) => {
+          if (result.success) {
+            console.log(`Chat Plays: ${result.key} pressed from ${latestMessage.from?.name}`);
+            
+            //this will dispatch event for both handler and extension
+            window.dispatchEvent(new CustomEvent('chat-message', {
+              detail: {
+                message: latestMessage.message,
+                sender: latestMessage.from?.name,
+                key: result.key,
+                allowedKeys: result.allowedKeys
+              }
+            }));
+            
+     
+            window.dispatchEvent(new CustomEvent('ribbit-chat-message', {
+              detail: {
+                key: result.key,
+                message: latestMessage.message,
+                sender: latestMessage.from?.name,
+                allowedKeys: result.allowedKeys
+              }
+            }));
+          }
+        });
+    }, [messages, hostIdentity, isChatEnabled]);
+
     return (
         <div className="flex flex-col bg-background border-l border-b pt-0 h-[calc(100vh-80px)]">
       <ChatsHeader />
