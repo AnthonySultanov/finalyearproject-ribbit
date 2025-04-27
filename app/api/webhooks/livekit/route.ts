@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     
     try {
         const body = await req.text();
-        const headersList = headers();
+        const headersList = await headers();
         const authHeader = (await headersList).get("Authorization");
         
         if (!authHeader) {
