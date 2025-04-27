@@ -7,20 +7,18 @@ import { VideoPlayer } from "@/components/streamplayer";
 import { fetchusername } from "@/lib/services-fetchuser";
 import { ChatPlaysHandler } from "@/components/streamplayer/chatplayshandler";
 
+
+type Params = Promise<{ username: string }>;
+
 interface AccountPageProps {
-    params: {
-        username: string;
-    };
+    params: Params;
 }
 
 const AccountPage = async ({ params }: AccountPageProps) => {
 
- 
-
-   
+    const { username } = await params;
     
-  
-    const user = await fetchusername(params.username);
+    const user = await fetchusername(username);
     
     if (!user || !user.streaming) {
       return notFound();
@@ -33,15 +31,11 @@ const AccountPage = async ({ params }: AccountPageProps) => {
       return notFound();
     }
 
-   
-
     return (
       <>
         <VideoPlayer user={user} stream={user.streaming} isFollowing={FollowingUser} />
-        
       </>
     );
- 
 }
 
 export default AccountPage; 
