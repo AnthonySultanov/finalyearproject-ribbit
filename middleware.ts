@@ -6,21 +6,23 @@ const isPublicRoute = createRouteMatcher([
   '/api/webhooks/clerk(.*)',
   "/api/webhooks(.*)",
   "/api/uploadthing(.*)",
-  '/',  
+  '/',
+  '/(.*)/(.*)', 
   '/(.*)' 
 ])
 
 export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
-    await auth.protect()
+  const { nextUrl } = request;
+  const isPublic = isPublicRoute(request);
+  
+  if (isPublic) {
+    return;
   }
+  
+  
+  await auth.protect();
 })
 
 export const config = {
-  matcher: [
-    
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-   
-    '/(api|trpc)(.*)',
-  ],
+  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
 }

@@ -24,23 +24,8 @@ open source css framework
 
 
 
-
-
-
-
-
 in page.tsx next.js makes them servers automatically to makE IT SO u can add like click feature you just add "use client"; at the top of the page to make it work for client based things.Chaning server component to client component.
 
-
-
-login test
-username:testaccount
-email:Anthony9@live.ie
-password:vondutch89432
-
-
-
-database password:xFHMqNVdGx5qzta9
 
 to run :
 npm run dev

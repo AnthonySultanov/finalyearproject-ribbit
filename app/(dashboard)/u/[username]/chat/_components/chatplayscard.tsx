@@ -71,12 +71,8 @@ export const ChatPlaysCard = ({ isEnabled = false, allowedKeys = "wasd" }: ChatP
               <SelectValue placeholder="Select keys" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="wasd">WASD (Movement)</SelectItem>
-              <SelectItem value="arrows">Arrow Keys</SelectItem>
-              <SelectItem value="1234">Number Keys (1-4)</SelectItem>
-              <SelectItem value="space">Spacebar</SelectItem>
+              <SelectItem value="arrows">Arrow Keys (I=Up, K=Down, J=Left, L=Right, S=Space)</SelectItem>
               <SelectItem value="alphabet">All Letters (A-Z)</SelectItem>
-              <SelectItem value="custom">Custom</SelectItem>
             </SelectContent>
           </Select>
           

@@ -6,16 +6,13 @@ import { LiveStream } from "@/components/streamplayer/livestream";
 import { VideoPlayer } from "@/components/streamplayer";
 import { fetchusername } from "@/lib/services-fetchuser";
 import { ChatPlaysHandler } from "@/components/streamplayer/chatplayshandler";
-
-
-type Params = Promise<{ username: string }>;
+import { use } from "react";
 
 interface AccountPageProps {
-    params: Params;
+    params: Promise<{ username: string }>;
 }
 
 const AccountPage = async ({ params }: AccountPageProps) => {
-
     const { username } = await params;
     
     const user = await fetchusername(username);
@@ -38,4 +35,4 @@ const AccountPage = async ({ params }: AccountPageProps) => {
     );
 }
 
-export default AccountPage; 
+export default AccountPage;

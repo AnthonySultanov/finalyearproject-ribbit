@@ -15,6 +15,7 @@ import { ChatSkeleton } from "./chat";
 import { StreamHeader, StreamHeaderSkeleton } from "./streamheader";
 import { AboutStream } from "./Aboutstream";
 import { StreamBio } from "./streambio";
+import { ChatPlaysHandler } from "./chatplayshandler";
 
 
 
@@ -26,6 +27,7 @@ type StreamCustomSettings = {
   isLive: boolean;
   id: string;
   thumbnailUrl: string | null;
+  isChatPlaysEnabled: boolean;
 };
 
 
@@ -47,32 +49,29 @@ interface VideoPlayerProps {
 }
 
 export const VideoPlayer = ({ user, stream, isFollowing }: VideoPlayerProps) => {
-const { token, name, identity } = useviewertoken(user.id);
-const { collapsed } = useEnablechatsidebar((state) => state);
+  const { token, name, identity } = useviewertoken(user.id);
+  const { collapsed } = useEnablechatsidebar((state) => state);
 
+  //console.log(token, name, identity);
 
-//console.log(token, name, identity);
-
-if (!token || !name ) {
-  return <VideoPlayerSkeleton />;
-}
+  if (!token || !name) {
+    return <VideoPlayerSkeleton />;
+  }
 
   return (
     <>
-     {collapsed && (
+      {collapsed && (
         <div className="hidden lg:block fixed top-[100px] right-2 z-50">
           <ToggleChat />
         </div>
       )}
-      {/*this is livekit room component  that give us a room to connect to */}
-    <LiveKitRoom
-      token={token}
-      serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_WS_URL}
-      className={cn("grid grid-cols-1 lg:gap-y-0 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6 h-full", collapsed && "lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2")}>
-     <div className="space-y-4 col-span-1 lg:col-span-2 xl:col-span-2 2xl:col-span-5 lg:overflow-y-auto hidden-scrollbar pb-10">
-      
-      <Video hostName={user.username} hostIdentity={user.id} />
-      <StreamHeader
+      <LiveKitRoom
+        token={token}
+        serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_WS_URL}
+        className={cn("grid grid-cols-1 lg:gap-y-0 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6 h-full", collapsed && "lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2")}>
+        <div className="space-y-4 col-span-1 lg:col-span-2 xl:col-span-2 2xl:col-span-5 lg:overflow-y-auto hidden-scrollbar pb-10">
+          <Video hostName={user.username} hostIdentity={user.id} />
+          <StreamHeader
             hostName={user.username}
             hostIdentity={user.id}
             viewerIdentity={identity}
@@ -81,39 +80,42 @@ if (!token || !name ) {
             name={stream.name}
           />
           <AboutStream
-          hostIdentity={user.id}
-          viewerIdentity={identity}
-          name={stream.name}
-          thumbnailUrl={stream.thumbnailUrl}
-           />
-           <StreamBio 
-           hostName={user.username}
-           hostIdentity={user.id}
-           viewerIdentity={identity}
-           bio={user.bio}
-           followedByCount={user._count.followedby}
-           />
-      
-
-
-     </div>
-     <div className={cn("col-span-1", collapsed && "hidden")}>
+            hostIdentity={user.id}
+            viewerIdentity={identity}
+            name={stream.name}
+            thumbnailUrl={stream.thumbnailUrl}
+          />
+          <StreamBio 
+            hostName={user.username}
+            hostIdentity={user.id}
+            viewerIdentity={identity}
+            bio={user.bio}
+            followedByCount={user._count.followedby}
+          />
+        </div>
+        <div className={cn("col-span-1", collapsed && "hidden")}>
           <Chat
             viewerName={name}
             hostName={user.username}
             hostIdentity={user.id}
             isFollowing={isFollowing}
-            isChatEnabled={stream.isChatEnabled}
+            isChatEnabled={true} 
             isChatDelayed={stream.isChatDelaymode}
             isChatFollowersOnly={stream.isChatFollowersOnly}
           />
         </div>
-      
-    </LiveKitRoom>
+        
+     
+        <ChatPlaysHandler
+          hostIdentity={user.id}
+          isChatPlaysEnabled={stream.isChatPlaysEnabled || false}
+          isLive={stream.isLive}
+          isChatEnabled={true} 
+        />
+      </LiveKitRoom>
     </>
   );
-}
-
+};
 
 export const VideoPlayerSkeleton = () => {
   return (
@@ -121,7 +123,6 @@ export const VideoPlayerSkeleton = () => {
       <div className="space-y-4 col-span-1 lg:col-span-2 xl:col-span-2 2xl:col-span-5 lg:overflow-y-auto hidden-scrollbar pb-10">
         <VideoSkeleton />
         <StreamHeaderSkeleton />
-        
       </div>
       <div className="col-span-1 bg-background">
         <ChatSkeleton /> 

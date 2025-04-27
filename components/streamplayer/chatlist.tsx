@@ -10,22 +10,33 @@ interface ChatlistProps {
     isHidden: boolean;
 }
 export const Chatlist = ({ messages, isHidden }: ChatlistProps) => {
-    if (isHidden || !messages || messages.length === 0) {
+    if (isHidden) {
         return (
           <div className="flex flex-1 items-center justify-center">
             <p className="text-sm text-muted-foreground">
-              {isHidden ? "Chat is disabled" : "Welcome to the chat!"}
+              Chat is disabled
             </p>
           </div>
         );
-      }
-  return (
-    <div className="flex flex-1 flex-col-reverse overflow-y-auto p-3 h-full">
-      {messages.map((message) => (
-        <ChatMessages key={message.timestamp} data={message} />
-      ))}
-    </div>
-  );
+    }
+    
+    if (!messages || messages.length === 0) {
+        return (
+          <div className="flex flex-1 items-center justify-center">
+            <p className="text-sm text-muted-foreground">
+              Welcome to the chat! Be the first to say hello.
+            </p>
+          </div>
+        );
+    }
+    
+    return (
+      <div className="flex flex-1 flex-col-reverse overflow-y-auto p-3 h-full">
+        {messages.map((message) => (
+          <ChatMessages key={message.timestamp} data={message} />
+        ))}
+      </div>
+    );
 };
 
 

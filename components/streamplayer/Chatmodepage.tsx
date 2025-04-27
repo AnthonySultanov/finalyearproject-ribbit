@@ -71,140 +71,49 @@ export const ChatModePage = ({
 
   const togglePictureInPicture = () => {
     if (!isPipActive) {
-      //this will create a new window for PiP chat
-      pipWindowRef = window.open('', 'StreamChat', 'width=350,height=500,resizable=yes');
+      try {
+     
+        const baseUrl = window.location.origin;
+        const pathParts = window.location.pathname.split('/');
+        const username = pathParts[pathParts.length - 2] || pathParts[pathParts.length - 1];
+        const pipUrl = `${baseUrl}/${username}/chat?pip=true`;
+        
+        console.log("Opening PiP chat window with URL:", pipUrl);
+        
+        
+        pipWindowRef = window.open(pipUrl, 'StreamChat', 'width=350,height=500,resizable=yes');
+        
+        if (pipWindowRef) {
       
-      if (pipWindowRef) {
-        pipWindowRef.document.write(`
-          <html>
-            <head>
-              <title>Stream Chat</title>
-              <style>
-                body { 
-                  background-color: #121212; 
-                  color: white; 
-                  font-family: sans-serif;
-                  margin: 0;
-                  padding: 0;
-                  height: 100vh;
-                  overflow: hidden;
-                  display: flex;
-                  flex-direction: column;
-                }
-                .header {
-                  padding: 10px;
-                  background-color: #1a1a1a;
-                  border-bottom: 1px solid #333;
-                  font-weight: bold;
-                  text-align: center;
-                }
-                .chat-area {
-                  flex: 1;
-                  overflow-y: auto;
-                  padding: 10px;
-                  display: flex;
-                  flex-direction: column-reverse;
-                }
-                .footer {
-                  padding: 10px;
-                  background-color: #1a1a1a;
-                  border-top: 1px solid #333;
-                  text-align: center;
-                }
-                .message {
-                  margin-bottom: 8px;
-                  display: flex;
-                }
-                .timestamp {
-                  color: #666;
-                  font-size: 12px;
-                  margin-right: 8px;
-                }
-                .username {
-                  font-weight: bold;
-                  margin-right: 5px;
-                }
-                .content {
-                  word-break: break-word;
-                }
-              </style>
-            </head>
-            <body>
-              <div class="header">Stream Chat</div>
-              <div class="chat-area" id="chatMessages"></div>
-              <div class="footer">Picture-in-Picture Mode</div>
-              <script>
-                // Store chat messages to repopulate if needed
-                let messages = [];
-                
-                // Function to add a message to the chat
-                window.addMessage = function(timestamp, username, content, color) {
-                  const msgDiv = document.createElement('div');
-                  msgDiv.className = 'message';
-                  
-                  const timeSpan = document.createElement('span');
-                  timeSpan.className = 'timestamp';
-                  timeSpan.textContent = timestamp;
-                  
-                  const nameSpan = document.createElement('span');
-                  nameSpan.className = 'username';
-                  nameSpan.textContent = username + ':';
-                  nameSpan.style.color = color || '#ffffff';
-                  
-                  const contentSpan = document.createElement('span');
-                  contentSpan.className = 'content';
-                  contentSpan.textContent = content;
-                  
-                  msgDiv.appendChild(timeSpan);
-                  msgDiv.appendChild(nameSpan);
-                  msgDiv.appendChild(contentSpan);
-                  
-                  document.getElementById('chatMessages').prepend(msgDiv);
-                  
-                  // Store message
-                  messages.push({timestamp, username, content, color});
-                };
-                
-                // Listen for messages from parent window
-                window.addEventListener('message', function(event) {
-                  if (event.data.type === 'chat-message') {
-                    window.addMessage(
-                      event.data.timestamp,
-                      event.data.username,
-                      event.data.content,
-                      event.data.color
-                    );
-                  } else if (event.data.type === 'load-history') {
-                    // Load existing messages from history
-                    event.data.messages.forEach(msg => {
-                      window.addMessage(
-                        msg.timestamp,
-                        msg.username,
-                        msg.content,
-                        msg.color
-                      );
-                    });
-                  }
-                });
-              </script>
-            </body>
-          </html>
-        `);
-        
-        
-        setIsPipActive(true);
-        //this will expose the window globally so chat.tsx can access it
-        (window as any).pipChatWindow = pipWindowRef;
-        
-        //this will dispatch a custom event to notify chat component 
-        window.dispatchEvent(new CustomEvent('pip-chat-opened'));
+          window.pipChatWindow = pipWindowRef;
+          setIsPipActive(true);
+          
+
+          window.dispatchEvent(new CustomEvent('pip-chat-opened'));
+          
+   
+          pipWindowRef.onbeforeunload = () => {
+            setIsPipActive(false);
+            window.pipChatWindow = null;
+          };
+          
+          //this will check if the window is still open
+          const checkInterval = setInterval(() => {
+            if (pipWindowRef && pipWindowRef.closed) {
+              clearInterval(checkInterval);
+              setIsPipActive(false);
+              window.pipChatWindow = null;
+            }
+          }, 1000);
+        } else {
+          console.error("Failed to open PiP window");
+        }
+      } catch (error) {
+        console.error("Error opening PiP window:", error);
       }
-    } else {
-      //this will close the PiP window if it exists
-      if (pipWindowRef && !pipWindowRef.closed) {
-        pipWindowRef.close();
-      }
-      pipWindowRef = null;
+    } else if (pipWindowRef && !pipWindowRef.closed) {
+      pipWindowRef.close();
+      window.pipChatWindow = null;
       setIsPipActive(false);
     }
   };
@@ -250,3 +159,6 @@ export const ChatModePageSkeleton = () => {
       </div>
     );
 }
+
+
+

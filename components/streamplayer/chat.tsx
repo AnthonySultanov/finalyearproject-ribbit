@@ -20,7 +20,7 @@ import { format } from "date-fns";
 import { stringToColor } from "@/lib/utils";
 import { processChatPlaysMessage } from "@/actions/chatplays";
 
-//this will declare the global window property for TypeScript
+//this will declare the global window property for typescript
 declare global {
   interface Window {
     pipChatWindow?: Window | null;
@@ -57,12 +57,20 @@ export const Chat = ({
     const [isChatDelayed, setIsChatDelayed] = useState(initialChatDelayed);
     const [isChatFollowersOnly, setIsChatFollowersOnly] = useState(initialChatFollowersOnly);
 
-    const isOnline = remoteParticipant && connectionState === ConnectionState.Connected;
-
-    const isHidden = !isChatEnabled || !isOnline;
+    //this will check if the user is online
+    const isOnline = true; 
+    
+    //this will check if the chat is hidden
+    const isHidden = !isChatEnabled;
 
     const [value, setValue] = useState("");
     const { chatMessages: messages, send } = useChat();
+    
+    
+    const otherwaymessage = useMemo(() => {
+      //sort messages by timestamp
+      return messages.sort((a, b) => b.timestamp - a.timestamp);
+    }, [messages]);
 
     //this will listen for data messages from the host
     useEffect(() => {
@@ -94,7 +102,7 @@ export const Chat = ({
                     //this will process any message for Chat Plays
                     processChatPlaysMessage(data.message, hostIdentity)
                         .then((result) => {
-                            if (result.success) {
+                            if (result.success && result.key) {
                                 console.log(`Chat Plays: ${result.key} pressed from ${data.user}`);
                                   
                                 //this will dispatch event for Chat Plays handler to pick up
@@ -103,7 +111,7 @@ export const Chat = ({
                                         message: data.message,
                                         sender: data.user,
                                         key: result.key,
-                                        allowedKeys: result.allowedKeys
+                                        allowedKeys: result.allowedKeys || "wasd"
                                     }
                                 }));
                                 
@@ -113,7 +121,7 @@ export const Chat = ({
                                         key: result.key,
                                         message: data.message,
                                         sender: data.user,
-                                        allowedKeys: result.allowedKeys
+                                        allowedKeys: result.allowedKeys || "wasd"
                                     }
                                 }));
                             }
@@ -141,10 +149,13 @@ export const Chat = ({
 
   //this will handle the PiP chat window
   useEffect(() => {
-    //this will forward new messages to PiP window if open
+    //this will forward messages to PiP window
     const forwardMessagesToPip = () => {
       if (window.pipChatWindow && !window.pipChatWindow.closed) {
-        //this will send existing messages when PiP opens
+ 
+        window.pipChatWindow = window.pipChatWindow;
+        
+     
         const formattedMessages = otherwaymessage.map(msg => ({
           timestamp: format(msg.timestamp, "HH:mm"),
           username: msg.from?.name || "Unknown",
@@ -159,111 +170,73 @@ export const Chat = ({
       }
     };
 
-    //this will listen for PiP window opening
+    //this will listen for PiP window open event
     window.addEventListener('pip-chat-opened', forwardMessagesToPip);
+    
+    //this will listen for PiP window ready event
+    const handlePipReady = (event: MessageEvent) => {
+      if (event.data.type === 'pip-ready') {
+        forwardMessagesToPip();
+      }
+    };
+    
+    window.addEventListener('message', handlePipReady);
     
     return () => {
       window.removeEventListener('pip-chat-opened', forwardMessagesToPip);
+      window.removeEventListener('message', handlePipReady);
     };
-  }, [messages]);
+  }, [otherwaymessage]);
 
   //this will send new messages to PiP window
   useEffect(() => {
     if (messages.length > 0 && window.pipChatWindow && !window.pipChatWindow.closed) {
-      const lastMessage = messages[0]; // Most recent message
-      
-      window.pipChatWindow.postMessage({
-        type: 'chat-message',
-        timestamp: format(lastMessage.timestamp, "HH:mm"),
-        username: lastMessage.from?.name || "Unknown",
-        content: lastMessage.message,
-        color: stringToColor(lastMessage.from?.name || "")
-      }, '*');
+      try {
+        //this will get the last message
+        const lastMessage = messages[messages.length - 1];
+        
+        if (lastMessage) {
+          console.log("Sending message to PiP:", lastMessage.message);
+          
+          window.pipChatWindow.postMessage({
+            type: 'chat-message',
+            timestamp: format(lastMessage.timestamp, "HH:mm"),
+            username: lastMessage.from?.name || "Unknown",
+            content: lastMessage.message,
+            color: stringToColor(lastMessage.from?.name || "")
+          }, '*');
+        }
+      } catch (error) {
+        console.error("Error sending message to PiP:", error);
+      }
     }
-  }, [messages]);
-
-  const otherwaymessage = useMemo(() => {
-    //sort messages by timestamp
-    return messages.sort((a, b) => b.timestamp - a.timestamp);
   }, [messages]);
 
   const onSubmit = () => {
     if (!send) return;
 
-    //this will check if it's a ban command
-    if (value.startsWith('/ban ')) {
-      //this will only allow the streamer/host to use the ban command
-      if (viewerName === hostName) {
-        const username = value.substring(5).trim();
-        if (username) {
-          //this will show a system message in chat - only visible to the host
-          send(`Attempting to ban user: ${username}...`);
-          
-          //this will call the ban action
-          import('@/actions/banusernamechat').then(({ banByUsername }) => {
-            banByUsername(username).then((result: { success: boolean, message: string }) => {
-              if (result.success) {
-                send(`System: ${result.message}`);
-              } else {
-                send(`System: Failed to ban ${username}. ${result.message}`);
-              }
-            });
-          });
-        } else {
-          send("System: Invalid ban command. Use /ban username");
-        }
-      } else {
-        //this will send a message if the user is not the host
-        send("System: Only the streamer can use the /ban command");
-      }
-    } 
-    //this will check if it's an unban command
-    else if (value.startsWith('/unban ')) {
-      //this will only allow the streamer/host to use the unban command
-      if (viewerName === hostName) {
-        const username = value.substring(7).trim();
-        if (username) {
-          //this will show a system message in chat - only visible to the host
-          send(`Attempting to unban user: ${username}...`);
-          
-          //this will call the unban action
-          import('@/actions/unbanusernamechat').then(({ unbanByUsername }) => {
-            unbanByUsername(username).then((result: { success: boolean, message: string }) => {
-              if (result.success) {
-                send(`System: ${result.message}`);
-              } else {
-                send(`System: Failed to unban ${username}. ${result.message}`);
-              }
-            });
-          });
-        } else {
-          send("System: Invalid unban command. Use /unban username");
-        }
-      } else {
-        //this will send a message if the user is not the host
-        send("System: Only the streamer can use the /unban command");
-      }
+    if (value.startsWith("/")) {
+     
     } else {
-      // Send message to chat
+
       send(value);
       
-      // We don't need to check for viewerName === hostName here
-      // Process all messages for Chat Plays regardless of who sent them
-      processChatPlaysMessage(value, hostIdentity)
-          .then((result) => {
-              if (result.success) {
-                  console.log(`Chat Plays: ${result.key} pressed from ${viewerName}`);
-                  
-                  window.dispatchEvent(new CustomEvent('ribbit-chat-message', {
-                      detail: {
-                          key: result.key,
-                          message: value,
-                          sender: viewerName, 
-                          allowedKeys: result.allowedKeys
-                      }
-                  }));
-              }
-          });
+     
+      if (window.pipChatWindow && !window.pipChatWindow.closed) {
+        try {
+          window.pipChatWindow.postMessage({
+            type: 'chat-message',
+            timestamp: format(new Date(), "HH:mm"),
+            username: viewerName || "You",
+            content: value,
+            color: stringToColor(viewerName || "")
+          }, '*');
+        } catch (error) {
+          console.error("Error sending direct message to PiP:", error);
+        }
+      }
+      
+    
     }
     
     setValue("");
@@ -314,6 +287,149 @@ export const Chat = ({
         });
     }, [messages, hostIdentity, isChatEnabled]);
 
+    
+    const processedMessageIds = new Set<string>();
+
+
+    const broadcastToExtension = (key: string, sender: string, message: string) => {
+      try {
+       
+        const event = new CustomEvent('ribbit-chatplays', {
+          detail: {
+            key: key,
+            sender: sender,
+            message: message,
+            messageId: Date.now().toString(),
+            timestamp: Date.now()
+          }
+        });
+        
+    
+        window.dispatchEvent(event);
+        
+        //this will use broadcast channel for cross tab communication
+        if (window.BroadcastChannel) {
+          try {
+            const bc = new BroadcastChannel('ribbit-chatplays-channel');
+            bc.postMessage({
+              key: key,
+              sender: sender,
+              message: message,
+              messageId: Date.now().toString(),
+              timestamp: Date.now()
+            });
+          } catch (err) {
+            console.error("BroadcastChannel error:", err);
+          }
+        }
+      } catch (error) {
+        console.error("Error broadcasting to extension:", error);
+      }
+    };
+
+
+    const processChatPlaysMessageWithMapping = async (message: string, hostIdentity: string, sender: string, messageId: string) => {
+      
+      if (processedMessageIds.has(messageId)) {
+        console.log(`Skipping already processed message: ${messageId}`);
+        return;
+      }
+      
+    
+      processedMessageIds.add(messageId);
+      
+      //cleans up old entries
+      if (processedMessageIds.size > 100) {
+        const oldestEntry = processedMessageIds.values().next().value;
+        if (oldestEntry !== undefined) {
+          processedMessageIds.delete(oldestEntry);
+        }
+      }
+      
+      const currentTime = Date.now();
+      
+      try {
+        const result = await processChatPlaysMessage(message, hostIdentity);
+        
+        if (result && typeof result === 'object' && result.success && result.key) {
+          
+          let mappedKey = result.key;
+          if (mappedKey.toLowerCase() === 'i') mappedKey = 'ArrowUp';
+          if (mappedKey.toLowerCase() === 'k') mappedKey = 'ArrowDown';
+          if (mappedKey.toLowerCase() === 'j') mappedKey = 'ArrowLeft';
+          if (mappedKey.toLowerCase() === 'l') mappedKey = 'ArrowRight';
+          if (mappedKey.toLowerCase() === 'e') mappedKey = 'Enter';
+          
+          console.log(`Chat Plays: ${mappedKey} pressed from ${sender} (original: ${result.key})`);
+          
+          //this is the event that the extension will listen for
+          window.dispatchEvent(new CustomEvent('ribbit-chatplays', {
+            detail: {
+              key: mappedKey,
+              originalKey: result.key,
+              sender: sender,
+              timestamp: currentTime,
+              messageId: messageId
+            }
+          }));
+        }
+      } catch (error) {
+        console.error("Error processing chat plays message:", error);
+      }
+    };
+
+   
+    useEffect(() => {
+      if (!messages.length || !isChatEnabled) return;
+
+      //get the latest message
+      const latestMessage = messages[messages.length - 1];
+      if (!latestMessage || !latestMessage.message) return;
+      
+      //this will check if the message is from the host
+      if (!latestMessage.from?.name || latestMessage.message.startsWith('System:')) {
+        return;
+      }
+      
+      //creates a unique message id
+      const messageId = `${latestMessage.from?.name}-${latestMessage.message}-${Date.now()}`;
+      
+      //checks if the message has been processed
+      if (processedMessageIds.has(messageId)) {
+        console.log(`Skipping already processed message: ${messageId}`);
+        return;
+      }
+      
+      //this processes the message
+      processChatPlaysMessage(latestMessage.message, hostIdentity)
+        .then((result) => {
+          if (result.success && result.key) {
+            console.log(`Chat Plays key ${result.key} triggered by ${latestMessage.from?.name} at ${new Date().toISOString()}`);
+            
+           
+            let mappedKey = result.key;
+            
+            //this will broadcast the event to the extension
+            broadcastToExtension(mappedKey, latestMessage.from?.name || "Unknown", latestMessage.message);
+            
+            //this will dispatch event for both handler and extension
+            window.dispatchEvent(new CustomEvent('chat-message', {
+              detail: {
+                message: latestMessage.message,
+                sender: latestMessage.from?.name,
+                key: mappedKey,
+                allowedKeys: result.allowedKeys || "wasd",
+                messageId: messageId,
+                timestamp: Date.now()
+              }
+            }));
+          }
+        })
+        .catch(error => {
+          console.error("Error processing chat message:", error);
+        });
+    }, [messages, hostIdentity, isChatEnabled]);
+
     return (
         <div className="flex flex-col bg-background border-l border-b pt-0 h-[calc(100vh-80px)]">
       <ChatsHeader />
@@ -350,6 +466,24 @@ export const ChatSkeleton = () => {
     </div>
   );
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

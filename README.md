@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🐸 Ribbit
 
-## Getting Started
+A real-time, feature-rich web app built for seamless interaction and performance.
 
-First, run the development server:
+---
+
+## 🚀 Getting Started
+
+
+## 📋 Key Features
+Live Streaming: Real-time video broadcasting with interactive viewer engagement
+Chat Plays: Unique feature allowing viewers to control games/applications through chat commands
+Community Management: Tools for streamers to manage their community and moderate chat
+Picture-in-Picture Chat: Detachable chat window for multi-tasking while viewing streams
+Custom Thumbnails: Personalize your stream with custom thumbnails and descriptions
+
+---
+
+## 🛠️ Tech Stack
+Frontend: Next.js, React, TypeScript, Tailwind CSS
+Backend: Next.js API routes, Prisma ORM
+Real-time: LiveKit (WebRTC streaming), custom event systems
+Authentication: Clerk
+Database: PostgreSQL (via Supabase)
+Deployment: Vercel
+
+---
+## 🌐 Live Deployment
+
+ https://finalyearproject-ribbit.vercel.app
+
+ https://www.dropbox.com/scl/fi/vz10jc39klo96jlzbx7zb/2025-05-05-17-32-01.mp4?rlkey=ykum86vxt2v0v5thzf9gvyew1&st=y553jewb&dl=0
+ 
+ https://www.dropbox.com/scl/fo/7fat7vqg13uj3i1l2oj3s/AFVAZDF_xMbkih7wAGLj3Xw?rlkey=lf7t62ochodwtwxhkciitpa7z&st=k9eabhhl&dl=1
+ 
+---
+
+### To deploy locally:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
