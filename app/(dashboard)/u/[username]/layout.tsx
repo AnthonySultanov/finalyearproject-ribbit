@@ -3,16 +3,16 @@ import { redirect } from "next/navigation";
 import { Navbar } from "./_components/navbar";
 import { Sidebar } from "./_components/sidebar";
 import { Container } from "./_components/container";
+
+
+type Params = Promise<{ username: string }>;
+
 interface dashboardLayoutProps {
     children: React.ReactNode;
-    params: {
-        username: string;
-    };
+    params: Params;
 }
 
-
 const dashboardLayout = async ({children, params}: dashboardLayoutProps) => {
-   
     const { username } = await params;
     const user = await fetchusername(username);
 

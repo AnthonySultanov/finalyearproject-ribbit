@@ -3,10 +3,11 @@ import { getaccountusername } from "@/lib/account-service";
 import { currentUser } from "@clerk/nextjs/server";
 import { fetchusername } from "@/lib/services-fetchuser";
 
+
+type Params = Promise<{ username: string }>;
+
 interface DashboardPageProps {
-    params: {
-        username: string;
-    }
+    params: Params;
 }
 
 const DashboardPage = async ({params}: DashboardPageProps) => {

@@ -45,7 +45,15 @@ export const Actions = ({ alreadyfollowing, userid }: followactionprops) => {
 
    const handelingtheblocking = () => {
     startTransition(() => {
-      whenblock(userid).then((data) => toast.success(`Successfully blocked ${data.blocked.username}`)).catch(() => toast.error("Failed to block account"))
+      whenblock(userid)
+        .then((data) => {
+          if (data?.blocked?.username) {
+            toast.success(`Successfully blocked ${data.blocked.username}`);
+          } else {
+            toast.success("Successfully blocked user");
+          }
+        })
+        .catch(() => toast.error("Failed to block account"));
     });
    }
 

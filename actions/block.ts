@@ -26,8 +26,8 @@ export const whenblock = async (id: string) => {
         //user not in the room
       }
     
-  revalidatePath(`/u/${self.username}/community`);
-    return blocktheuser;
+    revalidatePath(`/u/${self.username}/community`);
+    return blocktheaccount;
 };
 
 

@@ -3,10 +3,11 @@ import { columns } from "./_components/columns";
 import { DataTable } from "./_components/data-table";
 import { format } from "date-fns";
 
+// Define params as a Promise
+type Params = Promise<{ username: string }>;
+
 interface PageProps {
-    params: {
-        username: string;
-    }
+    params: Params;
 }
 
 const DashboardCommunityPage = async ({ params }: PageProps) => {
